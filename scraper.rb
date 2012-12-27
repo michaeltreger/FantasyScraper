@@ -15,6 +15,7 @@ end
 # Create Current Roster Table
 #############################
 db.exec "CREATE TABLE IF NOT EXISTS roster (player_name TEXT, slot TEXT, fteam INT)"
+db.exec "DELETE FROM roster *"
 
 (1..8).each do |team_id|
   data = Wombat.crawl do
