@@ -1,14 +1,21 @@
 require 'wombat'
 require 'pp'
 require 'pg'
+require 'uri'
 
-db = PGconn.open(:host => 'localhost', :port => 5432)
+p = URI.parse(ENV['DATABASE_URL'] || 'postgres://localhost/fantasy')
+
+db = PGconn.open(:host => p.host, :port => p.port, :user => p.user, :password => p.password)
 
 # Create Database Fantasy if it does not exist
 res = db.exec "SELECT 1 FROM pg_database WHERE datname='fantasy'"
 if res.ntuples == 0
   db.exec "CREATE DATABASE fantasy"
 end
+
+db.close
+
+db = PGconn.open(:host => p.host, :port => p.port, :user => p.user, :password => p.password, :dbname => 'fantasy')
 
 db.exec "CREATE TABLE IF NOT EXISTS fantasy (player_name TEXT, team TEXT, fteam INT, min INT, fgm INT, fga INT, ftm INT, fta INT, reb INT, ast INT, stl INT, blk INT, tover INT, pts INT, fpts INT, opp TEXT, slot TEXT, period_id INT)"
 
