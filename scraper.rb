@@ -11,6 +11,35 @@ else
   db = PGconn.open(:host => p.host, :port => p.port, :dbname => p.path[1..-1])
 end
 
+#############################
+# Create Current Roster Table
+#############################
+db.exec "CREATE TABLE IF NOT EXISTS roster (player_name TEXT, slot TEXT, fteam INT)"
+
+(1..8).each do |team_id|
+  data = Wombat.crawl do
+    base_url "http://games.espn.go.com"
+    path "/fba/clubhouse?leagueId=202659&teamId=#{team_id}"
+
+    players "css=.pncPlayerRow", :iterator do
+      name  "css=td.playertablePlayerName a"
+      slot  "css=td.playerSlot"
+    end
+  end
+  data["players"].each do |p|
+    if p["name"] == nil
+      next
+    end
+    p["name"].gsub!(/[`'"]|(\ \ )/," ")
+    query = "INSERT INTO roster VALUES ('#{p["name"]}', '#{p["slot"]}', #{team_id});"
+    pp query
+    db.exec query
+  end
+end
+
+############################
+# Insert Team Player Records
+############################
 db.exec "CREATE TABLE IF NOT EXISTS fantasy (player_name TEXT, team TEXT, fteam INT, min INT, fgm INT, fga INT, ftm INT, fta INT, reb INT, ast INT, stl INT, blk INT, tover INT, pts INT, fpts INT, opp TEXT, slot TEXT, period_id INT)"
 
 opening_night = Time.parse("30/10/2012")
