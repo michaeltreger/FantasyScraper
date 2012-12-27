@@ -5,7 +5,7 @@ require 'uri'
 
 p = URI.parse(ENV['DATABASE_URL'] || 'postgres://localhost/fantasy')
 
-db = PGconn.open(:host => p.host, :port => p.port, :user => p.user, :password => p.password, :dbname => db.path[1..-1])
+db = PGconn.open(:host => p.host, :port => p.port, :user => p.user, :password => p.password, :dbname => p.path[1..-1])
 
 db.exec "CREATE TABLE IF NOT EXISTS fantasy (player_name TEXT, team TEXT, fteam INT, min INT, fgm INT, fga INT, ftm INT, fta INT, reb INT, ast INT, stl INT, blk INT, tover INT, pts INT, fpts INT, opp TEXT, slot TEXT, period_id INT)"
 
