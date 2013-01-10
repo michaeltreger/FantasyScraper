@@ -12,8 +12,11 @@ current_period = ((Time.now - opening_night) / one_day).to_i
 last_update = ((db.execute "SELECT MAX(period_id) FROM fantasy;")[0][0] or 0) + 1
 
 (last_update..current_period).each do |period_id|
+  ###########################
+  # Insert players on teams
+  ###########################
   (1..8).each do |team_id|
-    data = Wombat.crawl do  
+    data = Wombat.crawl do
       base_url "http://games.espn.go.com"
       path "/fba/clubhouse?leagueId=202659&teamId=#{team_id}&seasonId=2013&scoringPeriodId=#{period_id}"
 
@@ -34,15 +37,13 @@ last_update = ((db.execute "SELECT MAX(period_id) FROM fantasy;")[0][0] or 0) + 
       pp query
       db.execute query
     end
-  end      
-end
+  end
 
-###########################
-# Insert free agent records
-###########################
-(last_update..current_period).each do |period_id|
+  ###########################
+  # Insert free agent records
+  ###########################
   (0..250).step(50).each do |start_idx|
-    data = Wombat.crawl do  
+    data = Wombat.crawl do
       base_url "http://games.espn.go.com"
       path "/fba/leaders?leagueId=202659&scoringPeriodId=#{period_id}&seasonId=2013&startIndex=#{start_idx}"
 
@@ -68,7 +69,7 @@ end
         db.execute query
       end
     end
-  end      
+  end
 end
 
 db.close
