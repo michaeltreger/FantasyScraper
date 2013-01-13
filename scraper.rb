@@ -11,10 +11,13 @@ current_period = ((Time.now - opening_night) / one_day).to_i
 
 last_update = ((db.execute "SELECT MAX(period_id) FROM fantasy;")[0][0] or 0) + 1
 
+threads = []
+
 (last_update..current_period).each do |period_id|
   ###########################
   # Insert players on teams
   ###########################
+  threads[period_id] = Thread.new {
   (1..8).each do |fteam|
     data = Wombat.crawl do
       base_url "http://games.espn.go.com"
@@ -70,7 +73,10 @@ last_update = ((db.execute "SELECT MAX(period_id) FROM fantasy;")[0][0] or 0) + 
       end
     end
   end
+}
 end
+
+threads.each {|t| t.join}
 
 db.close
 
