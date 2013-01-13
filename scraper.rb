@@ -76,7 +76,7 @@ threads = Hash.new
 }
 end
 
-threads.each {|t| t.join}
+threads.each {|key, t| t.join;}
 
 db.close
 
