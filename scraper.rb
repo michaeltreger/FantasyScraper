@@ -96,12 +96,14 @@ threads = Hash.new
       players "css=.pncPlayerRow", :iterator do
         name  "css=td.playertablePlayerName"
         opp   "css=td div a"
+        status "css=td.gameStatusDiv"
         stats "css=td.playertableStat", :list
       end
     end
     data["players"].each do |p|
       stats = p["stats"]
       next if stats[0] == '--'
+      status = (p["status"])[0,1]
       next if status != 'W' and status != 'L'
       fullName = p["name"].split(/,\s*/)
       name = fullName[0].gsub(/[`'"]|(\s+)/," ").gsub(/\*/, "")
