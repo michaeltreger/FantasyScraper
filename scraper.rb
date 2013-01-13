@@ -42,6 +42,7 @@ end
 # Insert Team Player Records
 ############################
 db.exec "CREATE TABLE IF NOT EXISTS fantasy (player_name TEXT, team TEXT, fteam INT, min INT, fgm INT, fga INT, ftm INT, fta INT, reb INT, ast INT, stl INT, blk INT, tover INT, pts INT, fpts INT, opp TEXT, slot TEXT, period_id INT)"
+db.exec "DELETE FROM fantasy *"
 
 opening_night = Time.parse("30/10/2012")
 one_day = 60*60*24
