@@ -45,7 +45,7 @@ db.exec "CREATE TABLE IF NOT EXISTS fantasy (player_name TEXT, team TEXT, fteam 
 
 opening_night = Time.parse("30/10/2012")
 one_day = 60*60*24
-current_period = ((Time.now - opening_night) / one_day).to_i
+current_period = ((Time.now - opening_night) / one_day).to_i + 1
 
 # Will always do most recent games, incase issues with on-going games
 last_update = ((db.exec "SELECT MAX(period_id) FROM fantasy;")[0]["max"].to_i or 0)
