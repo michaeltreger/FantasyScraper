@@ -15,10 +15,10 @@ last_update = ((db.execute "SELECT MAX(period_id) FROM fantasy;")[0][0] or 0) + 
   ###########################
   # Insert players on teams
   ###########################
-  (1..8).each do |team_id|
+  (1..8).each do |fteam|
     data = Wombat.crawl do
       base_url "http://games.espn.go.com"
-      path "/fba/clubhouse?leagueId=202659&teamId=#{team_id}&seasonId=2013&scoringPeriodId=#{period_id}"
+      path "/fba/clubhouse?leagueId=202659&teamId=#{fteam}&seasonId=2013&scoringPeriodId=#{period_id}"
 
       players "css=.pncPlayerRow", :iterator do
         name  "css=td.playertablePlayerName"
@@ -31,9 +31,9 @@ last_update = ((db.execute "SELECT MAX(period_id) FROM fantasy;")[0][0] or 0) + 
       stats = p["stats"]
       next if stats[0] == '--'
       fullName = p["name"].split(/,\s*/)
-      name = fullName[0].gsub!(/[`'\*"]|(\ \ )/," ")
+      name = fullName[0].gsub(/[`'\*"]|(\s+)/," ")
       team = fullName[1][0,3]
-      query = "INSERT INTO fantasy VALUES ('#{name}', '#{team}',  #{team_id}, '', #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, '#{p["opp"]}', '#{p["slot"]}', #{period_id});"
+      query = "INSERT INTO fantasy VALUES ('#{name}', '#{team}',  #{fteam}, '', #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, '#{p["opp"]}', '#{p["slot"]}', #{period_id});"
       pp query
       db.execute query
     end
@@ -57,7 +57,7 @@ last_update = ((db.execute "SELECT MAX(period_id) FROM fantasy;")[0][0] or 0) + 
       stats = p["stats"]
       break if stats[0] == '--'
       fullName = p["name"].split(/,\s*/)
-      name = fullName[0].gsub!(/[`'"\*]|(\ \ )/," ")
+      name = fullName[0].gsub(/[`'"\*]|(\s+)/," ")
       team = fullName[1][0,3]
       if db.execute("SELECT count(*) FROM fantasy WHERE player_name = '#{name}' AND period_id = #{period_id};")[0][0] == 0
         query = "INSERT INTO fantasy VALUES ('#{name}', '#{team}', '', #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, #{stats[11]}, '#{p["opp"]}', 'FA', #{period_id});"
