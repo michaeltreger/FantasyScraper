@@ -31,7 +31,7 @@ last_update = ((db.execute "SELECT MAX(period_id) FROM fantasy;")[0][0] or 0) + 
       stats = p["stats"]
       next if stats[0] == '--'
       fullName = p["name"].split(/,\s*/)
-      name = fullName[0].gsub(/[`'\*"]|(\s+)/," ")
+      name = fullName[0].gsub(/[`'"]|(\s+)/," ").gsub(/\*/, "")
       team = fullName[1][0,3]
       query = "INSERT INTO fantasy VALUES ('#{name}', '#{team}',  #{fteam}, '', #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, '#{p["opp"]}', '#{p["slot"]}', #{period_id});"
       pp query
@@ -57,7 +57,7 @@ last_update = ((db.execute "SELECT MAX(period_id) FROM fantasy;")[0][0] or 0) + 
       stats = p["stats"]
       break if stats[0] == '--'
       fullName = p["name"].split(/,\s*/)
-      name = fullName[0].gsub(/[`'"\*]|(\s+)/," ")
+      name = fullName[0].gsub(/[`'"]|(\s+)/," ").gsub(/\*/, "")
       team = fullName[1][0,3]
       if db.execute("SELECT count(*) FROM fantasy WHERE player_name = '#{name}' AND period_id = #{period_id};")[0][0] == 0
         query = "INSERT INTO fantasy VALUES ('#{name}', '#{team}', '', #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, #{stats[11]}, '#{p["opp"]}', 'FA', #{period_id});"
