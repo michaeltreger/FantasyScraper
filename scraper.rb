@@ -11,7 +11,7 @@ current_period = ((Time.now - opening_night) / one_day).to_i
 
 last_update = ((db.execute "SELECT MAX(period_id) FROM fantasy;")[0][0] or 0) + 1
 
-threads = []
+threads = Hash.new
 
 (last_update..current_period).each do |period_id|
   ###########################
