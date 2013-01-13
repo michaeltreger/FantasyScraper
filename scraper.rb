@@ -50,10 +50,13 @@ current_period = ((Time.now - opening_night) / one_day).to_i
 # Will always do most recent games, incase issues with on-going games
 last_update = ((db.exec "SELECT MAX(period_id) FROM fantasy;")[0]["max"].to_i or 0)
 
+threads = Hash.new
+
 (last_update..current_period).each do |period_id|
   ###########################
   # Insert players on teams
   ###########################
+  threads[period_id] = Thread.new {
   (1..8).each do |fteam|
     data = Wombat.crawl do
       base_url "http://games.espn.go.com"
@@ -113,7 +116,10 @@ last_update = ((db.exec "SELECT MAX(period_id) FROM fantasy;")[0]["max"].to_i or
       end
     end
   end
+}
 end
+
+threads.each {|key, t| t.join;}
 
 db.close
 
