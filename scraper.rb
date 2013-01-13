@@ -101,7 +101,8 @@ threads = Hash.new
     end
     data["players"].each do |p|
       stats = p["stats"]
-      break if stats[0] == '--'
+      next if stats[0] == '--'
+      next if status != 'W' and status != 'L'
       fullName = p["name"].split(/,\s*/)
       name = fullName[0].gsub(/[`'"]|(\s+)/," ").gsub(/\*/, "")
       team = fullName[1][0,3]
