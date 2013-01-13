@@ -63,16 +63,20 @@ last_update = ((db.exec "SELECT MAX(period_id) FROM fantasy;")[0]["max"].to_i or
         name  "css=td.playertablePlayerName"
         opp   "css=td div a"
         slot  "css=td.playerSlot"
+        status "css=td.gameStatusDiv"
         stats "css=td.playertableStat", :list
       end
     end
     data["players"].each do |p|
       stats = p["stats"]
       next if stats[0] == '--'
+      status = (p["status"])[0,1]
+      next if status != 'W' and status != 'L'
       fullName = p["name"].split(/,\s*/)
       name = fullName[0].gsub(/[`'"]|(\s+)/," ").gsub(/\*/, "")
       team = fullName[1][0,3]
-      query = "INSERT INTO fantasy VALUES ('#{name}', '#{team}',  #{fteam}, NULL, #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, '#{p["opp"]}', '#{p["slot"]}', #{period_id});"
+      query = "DELETE FROM fantasy * WHERE player_name = '#{name}' AND period_id = #{period_id};"\
+              "INSERT INTO fantasy VALUES ('#{name}', '#{team}',  #{fteam}, NULL, #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, '#{p["opp"]}', '#{p["slot"]}', #{period_id});"
       pp query
       db.exec query
     end
