@@ -14,7 +14,7 @@ end
 #############################
 # Create Current Roster Table
 #############################
-db.exec "CREATE TABLE IF NOT EXISTS roster (player_name TEXT, slot TEXT, fteam INT)"
+db.exec "CREATE TABLE IF NOT EXISTS roster (player_name TEXT, slot TEXT, fteam INT, positions TEXT)"
 db.exec "DELETE FROM roster *"
 
 (1..8).each do |team_id|
@@ -24,6 +24,7 @@ db.exec "DELETE FROM roster *"
 
     players "css=.pncPlayerRow", :iterator do
       name  "css=td.playertablePlayerName a"
+      positions "css=td.playertablePlayerName", :text
       slot  "css=td.playerSlot"
     end
   end
@@ -32,7 +33,9 @@ db.exec "DELETE FROM roster *"
       next
     end
     p["name"].gsub!(/[`'"]|(\ \ )/," ")
-    query = "INSERT INTO roster VALUES ('#{p["name"]}', '#{p["slot"]}', #{team_id});"
+    p["positions"].encode!("us-ascii", undef: :replace, replace: '_')
+    p["positions"] = /([^_]*?)(__|$)/.match(p["positions"])[0].gsub(/_/,'')
+    query = "INSERT INTO roster VALUES ('#{p["name"]}', '#{p["slot"]}', #{team_id}, '#{p["positions"]}');"
     pp query
     db.exec query
   end
