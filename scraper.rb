@@ -74,6 +74,7 @@ threads = Hash.new
         stats "css=td.playertableStat", :list
       end
     end
+    query = "INSERT INTO fantasy VALUES "
     data["players"].each do |p|
       stats = p["stats"]
       next if stats[0] == '--'
@@ -82,7 +83,11 @@ threads = Hash.new
       fullName = p["name"].split(/,\s*/)
       name = fullName[0].gsub(/[`'"]|(\s+)/," ").gsub(/\*/, "")
       team = fullName[1][0,3]
-      query = "INSERT INTO fantasy VALUES ('#{name}', '#{team}',  #{fteam}, NULL, #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, '#{p["opp"]}', '#{p["slot"]}', #{period_id});"
+      query << "('#{name}', '#{team}',  #{fteam}, NULL, #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, '#{p["opp"]}', '#{p["slot"]}', #{period_id}),"
+    end
+    if query != "INSERT INTO fantasy VALUES "
+      query.chop!
+      query << ';'
       pp query
       db.exec query
     end
