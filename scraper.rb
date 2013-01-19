@@ -44,7 +44,7 @@ end
 ############################
 # Insert Team Player Records
 ############################
-db.exec "CREATE TABLE IF NOT EXISTS fantasy (player_name TEXT, team TEXT, fteam INT, min INT, fgm INT, fga INT, ftm INT, fta INT, reb INT, ast INT, stl INT, blk INT, tover INT, pts INT, fpts INT, opp TEXT, slot TEXT, period_id INT, PRIMARY KEY(player_name, period_id))"
+db.exec "CREATE TABLE IF NOT EXISTS fantasy (player_name TEXT, team TEXT, fteam INT, min INT, fgm INT, fga INT, ftm INT, fta INT, reb INT, ast INT, stl INT, blk INT, tover INT, pts INT, fpts DECIMAL, opp TEXT, slot TEXT, period_id INT, PRIMARY KEY(player_name, period_id))"
 
 opening_night = Time.parse("30/10/2012")
 one_day = 60*60*24
@@ -59,6 +59,7 @@ threads = Hash.new
   ###########################
   # Insert players on teams
   ###########################
+  db.exec "DELETE FROM fantasy * WHERE period_id = #{period_id};"
   threads[period_id] = Thread.new {
   (1..8).each do |fteam|
     data = Wombat.crawl do
@@ -81,8 +82,7 @@ threads = Hash.new
       fullName = p["name"].split(/,\s*/)
       name = fullName[0].gsub(/[`'"]|(\s+)/," ").gsub(/\*/, "")
       team = fullName[1][0,3]
-      query = "DELETE FROM fantasy * WHERE player_name = '#{name}' AND period_id = #{period_id};"\
-              "INSERT INTO fantasy VALUES ('#{name}', '#{team}',  #{fteam}, NULL, #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, '#{p["opp"]}', '#{p["slot"]}', #{period_id});"
+      query = "INSERT INTO fantasy VALUES ('#{name}', '#{team}',  #{fteam}, NULL, #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, '#{p["opp"]}', '#{p["slot"]}', #{period_id});"
       pp query
       db.exec query
     end
