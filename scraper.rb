@@ -133,7 +133,7 @@ threads = Hash.new
     pp update_query
     db.exec update_query
   end
-}
+  }
 end
 
 threads.each {|key, t| t.join;}
