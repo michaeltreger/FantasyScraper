@@ -36,7 +36,6 @@ db.exec "DELETE FROM roster *"
     p["positions"].encode!("us-ascii", undef: :replace, replace: '_')
     p["positions"] = /([^_]*?)(__|$)/.match(p["positions"])[0].gsub(/_/,'')
     query = "INSERT INTO roster VALUES ('#{p["name"]}', '#{p["slot"]}', #{team_id}, '#{p["positions"]}');"
-    pp query
     db.exec query
   end
 end
@@ -125,14 +124,13 @@ threads = Hash.new
   if insert_query != "INSERT INTO fantasy VALUES "
     insert_query.chop!
     insert_query << ';'
-    pp insert_query
     db.exec insert_query
   end
 
   if update_query != ""
-    pp update_query
     db.exec update_query
   end
+  puts period_id
   }
 end
 
