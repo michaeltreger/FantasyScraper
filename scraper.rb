@@ -61,6 +61,9 @@ threads = Hash.new
   ###########################
   db.exec "DELETE FROM fantasy * WHERE period_id = #{period_id};"
   threads[period_id] = Thread.new {
+  insert_query = "INSERT INTO fantasy VALUES "
+  update_query = ""
+  fteam_players = Hash.new
   (1..8).each do |fteam|
     data = Wombat.crawl do
       base_url "http://games.espn.go.com"
@@ -74,7 +77,6 @@ threads = Hash.new
         stats "css=td.playertableStat", :list
       end
     end
-    query = "INSERT INTO fantasy VALUES "
     data["players"].each do |p|
       stats = p["stats"]
       next if stats[0] == '--'
@@ -83,13 +85,8 @@ threads = Hash.new
       fullName = p["name"].split(/,\s*/)
       name = fullName[0].gsub(/[`'"]|(\s+)/," ").gsub(/\*/, "")
       team = fullName[1][0,3]
-      query << "('#{name}', '#{team}',  #{fteam}, NULL, #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, '#{p["opp"]}', '#{p["slot"]}', #{period_id}),"
-    end
-    if query != "INSERT INTO fantasy VALUES "
-      query.chop!
-      query << ';'
-      pp query
-      db.exec query
+      fteam_players[name] = true
+      insert_query << "('#{name}', '#{team}',  #{fteam}, NULL, #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, '#{p["opp"]}', '#{p["slot"]}', #{period_id}),"
     end
   end
 
@@ -116,16 +113,25 @@ threads = Hash.new
       fullName = p["name"].split(/,\s*/)
       name = fullName[0].gsub(/[`'"]|(\s+)/," ").gsub(/\*/, "")
       team = fullName[1][0,3]
-      if db.exec("SELECT count(*) FROM fantasy WHERE player_name = '#{name}' AND period_id = #{period_id};")[0]["count"].to_i == 0
-        query = "INSERT INTO fantasy VALUES ('#{name}', '#{team}', NULL, #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, #{stats[11]}, '#{p["opp"]}', 'FA', #{period_id});"
-        pp query
-        db.exec query
+      if !fteam_players.has_key?(name)
+        insert_query << "('#{name}', '#{team}', NULL, #{stats[0]}, #{stats[1]}, #{stats[2]}, #{stats[3]}, #{stats[4]}, #{stats[5]}, #{stats[6]}, #{stats[7]}, #{stats[8]}, #{stats[9]}, #{stats[10]}, #{stats[11]}, '#{p["opp"]}', 'FA', #{period_id}),"
       else
-	      query = "UPDATE fantasy SET min = #{stats[0]} WHERE player_name = '#{name}' AND period_id = #{period_id};"
-        pp query
-        db.exec query
+	      update_query << "UPDATE fantasy SET min = #{stats[0]} WHERE player_name = '#{name}' AND period_id = #{period_id};"
       end
     end
+  end
+
+  # Execute Queries
+  if insert_query != "INSERT INTO fantasy VALUES "
+    insert_query.chop!
+    insert_query << ';'
+    pp insert_query
+    db.exec insert_query
+  end
+
+  if update_query != ""
+    pp update_query
+    db.exec update_query
   end
 }
 end
